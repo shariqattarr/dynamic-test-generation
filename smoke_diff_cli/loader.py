@@ -14,17 +14,19 @@ class TestCase:
     expect_body: Optional[dict] = None
     headers: Optional[dict] = None
     body: Optional[dict] = None
+    timeout: float = 30.0
 
 
 @dataclass
 class SmokeConfig:
     base_url: str
     tests: list[TestCase]
+    config_dir: Path = None  # directory where config file lives, for relative paths
 
 
 def load_config(path: str | Path) -> SmokeConfig:
     """Load and parse smoke.yml config file"""
-    path = Path(path)
+    path = Path(path).resolve()
     
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
@@ -40,6 +42,8 @@ def load_config(path: str | Path) -> SmokeConfig:
     
     if "tests" not in raw or not raw["tests"]:
         raise ValueError("Missing or empty 'tests' field")
+    
+    global_timeout = raw.get("timeout", 30.0)
     
     tests = []
     for i, t in enumerate(raw["tests"]):
@@ -63,9 +67,11 @@ def load_config(path: str | Path) -> SmokeConfig:
             expect_body=t.get("expect_body"),
             headers=t.get("headers"),
             body=t.get("body"),
+            timeout=t.get("timeout", global_timeout),
         ))
     
     return SmokeConfig(
         base_url=raw["base_url"].rstrip("/"),
         tests=tests,
+        config_dir=path.parent,
     )
