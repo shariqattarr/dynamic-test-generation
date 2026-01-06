@@ -1,0 +1,9 @@
+base_url: https://api.example.com
+tests:
+  - name: Get Users
+    path: /users
+    method: GET
+    expect_status: 200
+    expect_body_schema:
+      id: "int"
+      name: "str"
