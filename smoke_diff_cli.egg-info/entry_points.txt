@@ -1,0 +1,2 @@
+[console_scripts]
+smoke-diff = smoke_diff_cli.cli:app
